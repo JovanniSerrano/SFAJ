@@ -1,0 +1,888 @@
+<!-- ... existing code ... -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinépolis - La Magia del Cine</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para Íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cinepurple: '#2A0845',
+                        cinepurpleDark: '#120424',
+                        cinepurpleLight: '#5B1DA3',
+                        cineviolet: '#8B5CF6',
+                        cinemagenta: '#D946EF',
+                        cinelavender: '#E9D5FF',
+                        cinepurpleGlow: '#A855F7',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #120424;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #8B5CF6, #D946EF);
+            border-radius: 4px;
+        }
+        .seat {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-cinepurpleDark text-purple-100 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Contenedor de Notificaciones Toast -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- HEADER / BARRA DE NAVEGACIÓN -->
+    <header class="bg-cinepurpleDark/90 backdrop-blur-md border-b border-purple-900/50 sticky top-0 z-40 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#" onclick="showSection('cartelera')" class="flex items-center gap-3 group">
+                <div class="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-500 text-white font-black text-2xl px-4 py-1.5 rounded-2xl shadow-lg shadow-purple-900/50 tracking-wider transform group-hover:scale-105 transition duration-300">
+                    CINÉPOLIS
+                </div>
+                <span class="hidden sm:inline text-xs font-bold text-fuchsia-300 uppercase tracking-widest border-l border-purple-800/80 pl-3">La Magia del Cine</span>
+            </a>
+
+            <!-- Buscador en Tiempo Real -->
+            <div class="hidden md:flex items-center flex-1 max-w-md mx-8">
+                <div class="relative w-full">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-purple-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="movie-search" oninput="filterMovies(this.value)" placeholder="Buscar por título o género..." class="w-full bg-purple-950/60 text-white pl-10 pr-4 py-2.5 rounded-full border border-purple-700/50 focus:outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/30 text-sm transition placeholder-purple-400/60 shadow-inner">
+                </div>
+            </div>
+
+            <!-- Navegación Principal -->
+            <nav class="hidden lg:flex items-center space-x-6 text-sm font-bold">
+                <button onclick="showSection('cartelera')" class="nav-btn text-fuchsia-300 hover:text-white transition flex items-center gap-2 py-2">
+                    <i class="fa-solid fa-film text-purple-400"></i> Cartelera
+                </button>
+                <button onclick="showSection('entradas')" class="nav-btn text-purple-200 hover:text-fuchsia-300 transition flex items-center gap-2 py-2">
+                    <i class="fa-solid fa-ticket text-purple-400"></i> Entradas
+                </button>
+                <button onclick="showSection('dulceria')" class="nav-btn text-purple-200 hover:text-fuchsia-300 transition flex items-center gap-2 py-2">
+                    <i class="fa-solid fa-popcorn text-purple-400"></i> Dulcería
+                </button>
+                <button onclick="showSection('club')" class="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white px-5 py-2.5 rounded-full shadow-lg shadow-fuchsia-900/40 transition flex items-center gap-2 font-black transform hover:-translate-y-0.5 border border-fuchsia-400/30">
+                    <i class="fa-solid fa-id-card"></i> Club Cinépolis
+                </button>
+            </nav>
+
+            <!-- Menú Móvil -->
+            <div class="flex items-center lg:hidden">
+                <button onclick="toggleMobileMenu()" class="text-purple-200 hover:text-fuchsia-300 focus:outline-none p-2">
+                    <i id="mobile-menu-icon" class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menú Móvil Desplegable -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-cinepurpleDark border-t border-purple-900/80 px-4 pt-3 pb-5 space-y-2">
+            <div class="mb-3">
+                <input type="text" oninput="filterMovies(this.value)" placeholder="Buscar películas..." class="w-full bg-purple-950/70 text-white px-4 py-2 rounded-full border border-purple-700 text-sm focus:outline-none focus:border-fuchsia-500">
+            </div>
+            <button onclick="showSection('cartelera'); toggleMobileMenu();" class="block w-full text-left px-4 py-2.5 rounded-xl text-fuchsia-300 hover:bg-purple-900/40 font-bold"><i class="fa-solid fa-film mr-2"></i> Cartelera</button>
+            <button onclick="showSection('entradas'); toggleMobileMenu();" class="block w-full text-left px-4 py-2.5 rounded-xl text-purple-200 hover:bg-purple-900/40 font-bold"><i class="fa-solid fa-ticket mr-2"></i> Entradas</button>
+            <button onclick="showSection('dulceria'); toggleMobileMenu();" class="block w-full text-left px-4 py-2.5 rounded-xl text-purple-200 hover:bg-purple-900/40 font-bold"><i class="fa-solid fa-popcorn mr-2"></i> Dulcería</button>
+            <button onclick="showSection('club'); toggleMobileMenu();" class="block w-full text-left px-4 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-black mt-2"><i class="fa-solid fa-id-card mr-2"></i> Club Cinépolis</button>
+        </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- 1. CARTELERA DE PELÍCULAS -->
+        <section id="section-cartelera" class="space-y-8">
+            <!-- Hero Banner Promocional -->
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-cinepurple via-purple-950 to-cinepurpleDark p-8 md:p-12 border border-fuchsia-500/30">
+                <div class="absolute -right-12 -bottom-12 opacity-15 pointer-events-none">
+                    <i class="fa-solid fa-clapperboard text-[22rem] text-fuchsia-400"></i>
+                </div>
+                <div class="relative z-10 max-w-2xl">
+                    <span class="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-xs font-black uppercase px-3.5 py-1 rounded-full tracking-wider shadow-lg shadow-fuchsia-900/50">Estrenos Exclusivos</span>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white mt-4 mb-3 tracking-tight leading-tight drop-shadow-md">Vive la Experiencia del Gran Cine</h1>
+                    <p class="text-purple-200/90 text-sm md:text-base mb-6 leading-relaxed">Reserva tus asientos preferidos, explora nuestros deliciosos productos de dulcería y disfruta del mejor entretenimiento en salas MacroXE, VIP y Tradicional.</p>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="showSection('entradas')" class="bg-gradient-to-r from-fuchsia-500 via-purple-600 to-indigo-600 hover:from-fuchsia-400 hover:to-indigo-500 text-white font-black px-6 py-3 rounded-xl shadow-xl shadow-fuchsia-900/40 transition flex items-center gap-2 transform hover:-translate-y-0.5 border border-fuchsia-400/30">
+                            <i class="fa-solid fa-ticket-simple"></i> Comprar Entradas
+                        </button>
+                        <button onclick="showSection('dulceria')" class="bg-purple-900/50 hover:bg-purple-800/60 text-purple-100 font-bold px-6 py-3 rounded-xl border border-purple-500/40 shadow-lg transition flex items-center gap-2 backdrop-blur-sm">
+                            <i class="fa-solid fa-utensils text-fuchsia-400"></i> Menú Dulcería
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros de Géneros -->
+            <div class="flex items-center justify-between flex-wrap gap-4 pt-4 border-b border-purple-900/60 pb-4">
+                <h2 class="text-2xl font-black text-white flex items-center gap-2.5">
+                    <i class="fa-solid fa-film text-fuchsia-400"></i> Películas en Cartelera
+                </h2>
+                <div class="flex items-center gap-2 flex-wrap text-xs sm:text-sm" id="genre-filters">
+                    <button onclick="filterGenre('todos')" class="filter-btn bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-black px-4 py-2 rounded-full transition shadow-lg shadow-fuchsia-900/30">Todos</button>
+                    <button onclick="filterGenre('Acción')" class="filter-btn bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-4 py-2 rounded-full transition border border-purple-800/80">Acción</button>
+                    <button onclick="filterGenre('Animación')" class="filter-btn bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-4 py-2 rounded-full transition border border-purple-800/80">Animación</button>
+                    <button onclick="filterGenre('Terror')" class="filter-btn bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-4 py-2 rounded-full transition border border-purple-800/80">Terror</button>
+                    <button onclick="filterGenre('Sci-Fi')" class="filter-btn bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-4 py-2 rounded-full transition border border-purple-800/80">Sci-Fi</button>
+                </div>
+            </div>
+
+            <!-- Grid de Películas -->
+            <div id="movies-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-6 pt-2">
+                <!-- Generado por JS -->
+            </div>
+        </section>
+
+
+        <!-- 2. COMPRA DE ENTRADAS -->
+        <section id="section-entradas" class="hidden space-y-6">
+            <div class="bg-purple-950/40 border border-purple-800/60 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md">
+                <div class="flex items-center justify-between pb-6 border-b border-purple-900/60 flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white flex items-center gap-2.5">
+                            <i class="fa-solid fa-ticket text-fuchsia-400"></i> Selección de Entradas y Asientos
+                        </h2>
+                        <p class="text-xs sm:text-sm text-purple-300 mt-1">Elige tu película, tipo de sala, horario y butacas.</p>
+                    </div>
+                    <button onclick="showSection('cartelera')" class="text-xs sm:text-sm bg-purple-900/60 hover:bg-purple-800 px-4 py-2 rounded-xl text-purple-200 transition font-bold border border-purple-700/50">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Regresar a Cartelera
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
+                    <!-- Configuración de Selección -->
+                    <div class="lg:col-span-1 space-y-5 bg-cinepurpleDark/80 p-6 rounded-2xl border border-purple-800/50 shadow-inner">
+                        <h3 class="text-base font-extrabold text-fuchsia-400 border-b border-purple-900/80 pb-2">1. Detalles de la Función</h3>
+                        
+                        <!-- Película -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">Película</label>
+                            <select id="booking-movie-select" onchange="updateBookingDetails()" class="w-full bg-purple-950 text-white rounded-xl p-3 border border-purple-700/60 focus:outline-none focus:border-fuchsia-500 text-sm font-semibold">
+                                <!-- Llenado por JS -->
+                            </select>
+                        </div>
+
+                        <!-- Tipo de Sala -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">Formato de Sala</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" onclick="setFormat('Tradicional', 85)" class="format-btn bg-purple-900/60 border-2 border-fuchsia-500 text-white text-xs font-bold py-2.5 px-2 rounded-xl transition text-center shadow-md">Tradicional<br><span class="text-[10px] text-fuchsia-300">$85</span></button>
+                                <button type="button" onclick="setFormat('MacroXE', 120)" class="format-btn bg-purple-950 border-2 border-purple-900 text-purple-400 text-xs font-bold py-2.5 px-2 rounded-lg transition text-center">MacroXE<br><span class="text-[10px] text-purple-500">$120</span></button>
+                                <button type="button" onclick="setFormat('VIP', 160)" class="format-btn bg-purple-950 border-2 border-purple-900 text-purple-400 text-xs font-bold py-2.5 px-2 rounded-lg transition text-center">VIP<br><span class="text-[10px] text-purple-500">$160</span></button>
+                            </div>
+                        </div>
+
+                        <!-- Horarios -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">Horarios Disponibles</label>
+                            <div id="booking-times" class="grid grid-cols-3 gap-2">
+                                <!-- Llenado por JS -->
+                            </div>
+                        </div>
+
+                        <!-- Resumen -->
+                        <div class="pt-4 border-t border-purple-900/80 space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-purple-300">Asientos seleccionados:</span>
+                                <span id="selected-seats-count" class="font-bold text-white">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-purple-300">Precio por boleto:</span>
+                                <span id="ticket-price-display" class="font-bold text-fuchsia-400">$85.00</span>
+                            </div>
+                            <div class="flex justify-between text-base font-black pt-3 border-t border-purple-900/80">
+                                <span class="text-white">Total Entradas:</span>
+                                <span id="ticket-total-display" class="text-fuchsia-400 text-lg">$0.00</span>
+                            </div>
+                        </div>
+
+                        <button onclick="proceedToPayment()" class="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-black py-3.5 rounded-xl transition shadow-xl shadow-fuchsia-950/60 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 border border-fuchsia-400/30">
+                            <i class="fa-solid fa-credit-card"></i> Confirmar y Pagar
+                        </button>
+                    </div>
+
+                    <!-- Grilla de Asientos -->
+                    <div class="lg:col-span-2 bg-cinepurpleDark/80 p-6 rounded-2xl border border-purple-800/50 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-extrabold text-fuchsia-400 border-b border-purple-900/80 pb-2 mb-6">2. Selección de Butacas</h3>
+                            
+                            <!-- Pantalla -->
+                            <div class="w-full mb-8">
+                                <div class="bg-gradient-to-b from-fuchsia-500/30 via-purple-600/10 to-transparent h-8 w-3/4 mx-auto rounded-t-full flex items-center justify-center text-[11px] font-black uppercase tracking-widest text-fuchsia-300 border-t-2 border-fuchsia-400 shadow-lg shadow-fuchsia-900/30">
+                                    PANTALLA
+                                </div>
+                            </div>
+
+                            <!-- Grilla -->
+                            <div id="seats-grid" class="flex flex-col items-center gap-2.5 max-w-md mx-auto my-4">
+                                <!-- JS -->
+                            </div>
+
+                            <!-- Leyenda -->
+                            <div class="flex justify-center items-center gap-6 mt-8 text-xs text-purple-300 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-purple-950 rounded-t-md border border-purple-800"></div>
+                                    <span>Disponible</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-fuchsia-500 rounded-t-md shadow"></div>
+                                    <span>Seleccionado</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-rose-950 rounded-t-md border border-rose-800"></div>
+                                    <span>Ocupado</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 bg-purple-900/30 p-4 rounded-xl border border-purple-800/50 text-xs text-purple-200 flex items-center gap-3">
+                            <i class="fa-solid fa-circle-info text-fuchsia-400 text-lg flex-shrink-0"></i>
+                            <p>Toca o haz clic en las butacas para agregarlas a tu compra.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 3. DULCERÍA -->
+        <section id="section-dulceria" class="hidden space-y-6">
+            <div class="bg-purple-950/40 border border-purple-800/60 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md">
+                <div class="flex items-center justify-between pb-6 border-b border-purple-900/60 flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-white flex items-center gap-2.5">
+                            <i class="fa-solid fa-popcorn text-fuchsia-400"></i> Dulcería & Alimentos
+                        </h2>
+                        <p class="text-xs sm:text-sm text-purple-300 mt-1">Disfruta de nuestras crepas especialidad, combos de palomitas y bebidas refrescantes.</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="filterConcession('todos')" class="concession-filter bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-black px-3.5 py-1.5 rounded-lg text-xs transition">Todos</button>
+                        <button onclick="filterConcession('crepas')" class="concession-filter bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-3.5 py-1.5 rounded-lg text-xs transition border border-purple-800/80">Crepas</button>
+                        <button onclick="filterConcession('combo')" class="concession-filter bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-3.5 py-1.5 rounded-lg text-xs transition border border-purple-800/80">Combos</button>
+                        <button onclick="filterConcession('bebida')" class="concession-filter bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-3.5 py-1.5 rounded-lg text-xs transition border border-purple-800/80">Bebidas</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
+                    <!-- Catálogo Dulcería -->
+                    <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4" id="concession-grid">
+                        <!-- JS -->
+                    </div>
+
+                    <!-- Carrito de Compras -->
+                    <div class="lg:col-span-1 bg-cinepurpleDark/90 p-6 rounded-2xl border border-purple-800/60 flex flex-col justify-between shadow-inner">
+                        <div>
+                            <h3 class="text-base font-extrabold text-fuchsia-400 border-b border-purple-900/80 pb-2 mb-4 flex items-center justify-between">
+                                <span><i class="fa-solid fa-cart-shopping mr-2"></i> Tu Orden</span>
+                                <span id="cart-item-count" class="bg-fuchsia-600 text-white text-xs px-2.5 py-0.5 rounded-full font-black">0</span>
+                            </h3>
+
+                            <div id="cart-items-list" class="space-y-3 max-h-72 overflow-y-auto pr-1 text-xs">
+                                <p class="text-purple-400/60 text-center py-8">Tu carrito está vacío.</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-purple-900/80 mt-6 space-y-4">
+                            <div class="flex justify-between text-base font-black">
+                                <span class="text-white">Total Dulcería:</span>
+                                <span id="cart-total-price" class="text-fuchsia-400 text-lg">$0.00</span>
+                            </div>
+                            <button onclick="checkoutConcession()" class="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-black py-3.5 rounded-xl transition shadow-xl shadow-fuchsia-950/60 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 border border-fuchsia-400/30">
+                                <i class="fa-solid fa-bag-shopping"></i> Pagar Dulcería
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 4. CLUB CINÉPOLIS Y GENERADOR 16 DÍGITOS -->
+        <section id="section-club" class="hidden space-y-6">
+            <div class="bg-gradient-to-br from-cinepurple via-purple-950 to-cinepurpleDark border border-purple-700/60 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-20 -bottom-20 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-id-card text-[22rem] text-fuchsia-400"></i>
+                </div>
+
+                <div class="max-w-4xl mx-auto relative z-10">
+                    <div class="text-center mb-8">
+                        <span class="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-xs font-black uppercase px-3.5 py-1 rounded-full tracking-wider shadow">Membresía Exclusiva</span>
+                        <h2 class="text-3xl md:text-4xl font-black text-white mt-3">Solicita tu Tarjeta Club Cinépolis</h2>
+                        <p class="text-purple-200 text-xs sm:text-sm mt-2 max-w-xl mx-auto">Acumula puntos en cada visita, accede a preventas exclusivas, precio especial en boletos y combos de dulcería.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <!-- Tarjeta Visual Digital estilo Morado Neón -->
+                        <div class="bg-gradient-to-tr from-cinepurpleDark via-purple-900 to-fuchsia-900 p-6 rounded-2xl shadow-2xl border border-fuchsia-400/50 relative overflow-hidden transform hover:scale-105 transition duration-300 min-h-[220px] flex flex-col justify-between shadow-purple-950">
+                            <div class="absolute -right-6 -top-6 opacity-20">
+                                <i class="fa-solid fa-film text-9xl text-fuchsia-300"></i>
+                            </div>
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-fuchsia-500 text-white font-black text-xs px-2 py-0.5 rounded shadow">CLUB</span>
+                                    <span class="text-white font-black tracking-widest text-base">CINÉPOLIS</span>
+                                </div>
+                                <i class="fa-solid fa-wifi text-fuchsia-300 text-lg rotate-90"></i>
+                            </div>
+                            
+                            <div class="my-4">
+                                <p class="text-[10px] text-purple-300 uppercase tracking-widest font-semibold mb-1">Número de Socio (16 Dígitos)</p>
+                                <p id="card-display-number" class="text-lg sm:text-xl font-mono font-black text-fuchsia-300 tracking-widest drop-shadow-md">4532 8901 2345 6789</p>
+                            </div>
+
+                            <div class="flex justify-between items-end border-t border-purple-700/60 pt-3">
+                                <div>
+                                    <p class="uppercase text-[9px] text-purple-300/80 font-semibold">Titular</p>
+                                    <p id="card-display-name" class="font-bold text-white text-xs sm:text-sm tracking-wide">SOCIO CLUB CINÉPOLIS</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="uppercase text-[9px] text-purple-300/80 font-semibold">Nivel</p>
+                                    <p id="card-display-level" class="font-black text-fuchsia-400 text-xs uppercase">Fanático</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de Solicitud -->
+                        <div class="bg-cinepurpleDark/90 p-6 rounded-2xl border border-purple-800/80 shadow-xl space-y-4 backdrop-blur-md">
+                            <h3 class="text-base font-extrabold text-fuchsia-400 border-b border-purple-900/80 pb-2">Registro de Socio</h3>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-1">Nombre Completo</label>
+                                <input type="text" id="club-name-input" placeholder="Ej. Ana María López" class="w-full bg-purple-950 text-white rounded-xl p-3 border border-purple-800 focus:outline-none focus:border-fuchsia-500 text-xs sm:text-sm font-medium">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-1">Correo Electrónico</label>
+                                <input type="email" id="club-email-input" placeholder="socio@cinepolis.com" class="w-full bg-purple-950 text-white rounded-xl p-3 border border-purple-800 focus:outline-none focus:border-fuchsia-500 text-xs sm:text-sm font-medium">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-1">Nivel de Membresía</label>
+                                <select id="club-level-select" class="w-full bg-purple-950 text-white rounded-xl p-3 border border-purple-800 focus:outline-none focus:border-fuchsia-500 text-xs sm:text-sm font-semibold">
+                                    <option value="Fanático">Fanático (Nivel Inicial)</option>
+                                    <option value="Super Fan">Súper Fan (Puntos Dobles)</option>
+                                    <option value="VIP Black">Socio VIP Black (Acceso Exclusivo)</option>
+                                </select>
+                            </div>
+
+                            <button onclick="generateClubCard()" class="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-black py-3.5 rounded-xl transition shadow-xl shadow-fuchsia-950/60 flex items-center justify-center gap-2 mt-2 transform hover:-translate-y-0.5 border border-fuchsia-400/30">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Generar Tarjeta de 16 Dígitos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-cinepurpleDark border-t border-purple-900/60 text-purple-300 text-xs sm:text-sm mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="space-y-3">
+                    <div class="bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-black text-xl px-3 py-1 rounded-lg inline-block tracking-wider shadow">
+                        CINÉPOLIS
+                    </div>
+                    <p class="text-xs text-purple-300/80 leading-relaxed">Disfruta de la mejor experiencia del cine con la más alta calidad tecnológica e innovaciones gastronómicas en dulcería.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-3 border-l-2 border-fuchsia-500 pl-2">Navegación</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="#" onclick="showSection('cartelera')" class="hover:text-fuchsia-300 transition">Cartelera Nacional</a></li>
+                        <li><a href="#" onclick="showSection('entradas')" class="hover:text-fuchsia-300 transition">Venta de Boletos</a></li>
+                        <li><a href="#" onclick="showSection('dulceria')" class="hover:text-fuchsia-300 transition">Menú de Dulcería</a></li>
+                        <li><a href="#" onclick="showSection('club')" class="hover:text-fuchsia-300 transition">Club Cinépolis</a></li>
+                        <p> Serrano Flaco Alan jovanni - 0898 - 5°J - Mtra: Meza Díaz </p>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // Catálogo de Películas utilizando exactamente las imágenes especificadas por el usuario
+        const movies = [
+            {
+                id: 1,
+                title: "Baby Driver",
+                genre: "Acción",
+                duration: "113 min",
+                rating: "B15",
+                synopsis: "Baby, un joven piloto de fugas con acúfenos, confía en el ritmo de su música personal para ser el mejor en lo suyo. Cuando conoce a la chica de sus sueños, ve una oportunidad para abandonar su vida criminal.",
+                poster: "Baby Driver.jpg",
+                times: ["14:00", "16:45", "19:30", "22:15"]
+            },
+            {
+                id: 2,
+                title: "Avengers: Doomsday",
+                genre: "Sci-Fi",
+                duration: "165 min",
+                rating: "B",
+                synopsis: "Los Héroes Más Poderosos de la Tierra enfrentan su mayor amenaza hasta el momento con la llegada de Victor Von Doom en una batalla épica que decidirá el destino del multiverso.",
+                poster: "Doomsday.jpg",
+                times: ["13:00", "16:30", "20:00"]
+            },
+            {
+                id: 3,
+                title: "Cómo Entrenar a tu Dragón",
+                genre: "Animación",
+                duration: "125 min",
+                rating: "A",
+                synopsis: "Un joven vikingo desafía la tradición de su tribu al entablar amistad con uno de sus más temidos enemigos: un feroz dragón Furia Nocturna al que llama Hipo.",
+                poster: "Dragon.jpg",
+                times: ["11:30", "14:15", "17:00", "19:45"]
+            },
+            {
+                id: 4,
+                title: "La Noche del Demonio",
+                genre: "Terror",
+                duration: "103 min",
+                rating: "C",
+                synopsis: "Una familia busca ayuda para su hijo, quien ha caído en un estado de coma oscuro tras un incidente misterioso en el ático de su nueva casa.",
+                poster: "Insidiousjpg.jpg",
+                times: ["18:30", "21:00", "23:15"]
+            },
+            {
+                id: 5,
+                title: "Iron Man",
+                genre: "Acción",
+                duration: "126 min",
+                rating: "B",
+                synopsis: "Un empresario multimillonario construye una armadura blindada con alta tecnología para combatir el mal tras ser retenido en una cueva por secuestradores.",
+                poster: "Iron man.jpg",
+                times: ["12:00", "15:00", "18:15", "21:30"]
+            },
+            {
+                id: 6,
+                title: "Thor: El Mundo Oscuro",
+                genre: "Acción",
+                duration: "112 min",
+                rating: "B",
+                synopsis: "Thor lucha por restablecer el orden en el cosmos, pero una antigua raza liderada por Malekith regresa para volver a sumergir al universo en la oscuridad.",
+                poster: "Thor.jpg",
+                times: ["13:30", "16:15", "19:00"]
+            }
+        ];
+
+        // Catálogo de Dulcería utilizando las imágenes enviadas (CFR.jpg y CP.jpg) y complementos
+        const concessionItems = [
+            { id: 1, name: "Crepa Dulce de Zarzamora", category: "crepas", price: 95, desc: "Deliciosa crepa caliente rellena de crema de queso y mermelada de zarzamora silvestre.", image: "CFR.jpg" },
+            { id: 2, name: "Crepa Salada de Pepperoni", category: "crepas", price: 105, desc: "Crepa doradita estilo pizza con queso fundido, rebanadas de pepperoni y salsa italiana.", image: "CP.jpg" },
+            { id: 3, name: "Combo Cuates Palomitas", category: "combo", price: 210, desc: "2 Palomitas grandes + 2 Refrescos grandes de la fuente de sodas.", image: "combo cuates.jpg" },
+            { id: 4, name: "Combo Personal Snacker", category: "combo", price: 135, desc: "1 Palomitas medianas + 1 Refresco mediano + 1 Golosina a elegir.", image: "combo individual.jpg" },
+            { id: 5, name: "Icee Mangor", category: "bebida", price: 75, desc: "Bebida helada ultra refrescante sabor Mango.", image: "ice mango.jpg" },
+            { id: 6, name: "Refresco Jumbo 1 Litro", category: "bebida", price: 65, desc: "Refresco helado de tu sabor preferido con hielo.", image: "bebida.jpg" }
+        ];
+
+        // Variables de estado
+        let selectedMovieId = 1;
+        let selectedFormatPrice = 85;
+        let selectedTime = "14:00";
+        let selectedSeats = [];
+        let concessionCart = [];
+        const rows = ['A', 'B', 'C', 'D', 'E'];
+        const cols = 8;
+        let occupiedSeats = ['B3', 'B4', 'D5', 'C2'];
+
+        // Carga Inicial
+        window.onload = function() {
+            renderMovies(movies);
+            populateBookingMovies();
+            renderSeats();
+            renderConcession(concessionItems);
+        };
+
+        // Notificaciones Flotantes
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600' : (type === 'info' ? 'bg-purple-900' : 'bg-rose-700');
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-2xl text-xs sm:text-sm font-bold flex items-center gap-3 transform translate-y-5 opacity-0 transition-all duration-300 pointer-events-auto border border-white/20`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'} text-base"></i><span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-5', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-5', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Navegación
+        function showSection(sectionId) {
+            ['cartelera', 'entradas', 'dulceria', 'club'].forEach(sec => {
+                document.getElementById(`section-${sec}`).classList.add('hidden');
+            });
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            menu.classList.toggle('hidden');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        }
+
+        // 1. Render de Cartelera
+        function renderMovies(moviesList) {
+            const grid = document.getElementById('movies-grid');
+            grid.innerHTML = '';
+
+            if (moviesList.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-purple-300/60"><i class="fa-solid fa-film text-4xl mb-3 text-fuchsia-400"></i><p class="font-bold">No se encontraron películas con este filtro.</p></div>`;
+                return;
+            }
+
+            moviesList.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = "bg-purple-950/50 border border-purple-800/60 rounded-2xl overflow-hidden shadow-xl hover:border-fuchsia-500/80 transition duration-300 flex flex-col justify-between group backdrop-blur-sm";
+                card.innerHTML = `
+                    <div>
+                        <div class="relative overflow-hidden aspect-[2/3]">
+                            <img src="${movie.poster}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x600/2a0845/e9d5ff?text=${encodeURIComponent(movie.title)}'">
+                            <div class="absolute top-2.5 left-2.5 bg-cinepurpleDark/90 text-fuchsia-300 text-[10px] font-black px-2 py-0.5 rounded-md border border-purple-700/60 shadow">
+                                ${movie.rating}
+                            </div>
+                            <div class="absolute bottom-2.5 right-2.5 bg-black/80 text-white text-[10px] px-2 py-0.5 rounded-md font-bold">
+                                <i class="fa-regular fa-clock mr-1 text-fuchsia-400"></i>${movie.duration}
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <span class="text-[10px] font-black text-fuchsia-400 uppercase tracking-wider">${movie.genre}</span>
+                            <h3 class="text-base font-bold text-white mt-0.5 mb-1.5 leading-tight line-clamp-1">${movie.title}</h3>
+                            <p class="text-purple-300/80 text-xs line-clamp-2 leading-relaxed">${movie.synopsis}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <button onclick="selectMovieAndBook(${movie.id})" class="w-full bg-purple-900/60 hover:bg-gradient-to-r hover:from-fuchsia-600 hover:to-purple-600 hover:text-white text-purple-200 font-black py-2 rounded-xl border border-purple-700/50 transition duration-300 flex items-center justify-center gap-1.5 text-xs shadow-md">
+                            <i class="fa-solid fa-ticket"></i> Comprar
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterMovies(query) {
+            const filtered = movies.filter(m => 
+                m.title.toLowerCase().includes(query.toLowerCase()) || 
+                m.genre.toLowerCase().includes(query.toLowerCase())
+            );
+            renderMovies(filtered);
+        }
+
+        function filterGenre(genre) {
+            document.querySelectorAll('#genre-filters button').forEach(btn => {
+                btn.className = "filter-btn bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-4 py-2 rounded-full transition border border-purple-800/80 text-xs sm:text-sm";
+            });
+            event.currentTarget.className = "filter-btn bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-black px-4 py-2 rounded-full transition shadow-lg shadow-fuchsia-900/30 text-xs sm:text-sm";
+
+            if (genre === 'todos') {
+                renderMovies(movies);
+            } else {
+                renderMovies(movies.filter(m => m.genre.includes(genre)));
+            }
+        }
+
+        function selectMovieAndBook(movieId) {
+            selectedMovieId = movieId;
+            document.getElementById('booking-movie-select').value = movieId;
+            updateBookingDetails();
+            showSection('entradas');
+        }
+
+        // 2. Entradas y Mapa de Asientos
+        function populateBookingMovies() {
+            const select = document.getElementById('booking-movie-select');
+            select.innerHTML = '';
+            movies.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = `${m.title} (${m.duration} - Clasif. ${m.rating})`;
+                select.appendChild(opt);
+            });
+            select.value = selectedMovieId;
+            updateBookingDetails();
+        }
+
+        function updateBookingDetails() {
+            selectedMovieId = parseInt(document.getElementById('booking-movie-select').value);
+            const movie = movies.find(m => m.id === selectedMovieId);
+            
+            const timesContainer = document.getElementById('booking-times');
+            timesContainer.innerHTML = '';
+            selectedTime = movie.times[0];
+
+            movie.times.forEach(time => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `time-btn py-2 rounded-xl text-xs font-bold transition text-center border ${time === selectedTime ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white border-fuchsia-400 shadow-md' : 'bg-purple-950/70 text-purple-300 border-purple-800 hover:bg-purple-900/60'}`;
+                btn.textContent = time;
+                btn.onclick = () => {
+                    selectedTime = time;
+                    document.querySelectorAll('.time-btn').forEach(b => b.className = 'time-btn py-2 rounded-xl text-xs font-bold transition text-center border bg-purple-950/70 text-purple-300 border-purple-800 hover:bg-purple-900/60');
+                    btn.className = 'time-btn py-2 rounded-xl text-xs font-bold transition text-center border bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white border-fuchsia-400 shadow-md';
+                };
+                timesContainer.appendChild(btn);
+            });
+            selectedSeats = [];
+            renderSeats();
+            updateTicketSummary();
+        }
+
+        function setFormat(formatName, price) {
+            selectedFormatPrice = price;
+            document.querySelectorAll('.format-btn').forEach(btn => {
+                btn.className = "format-btn bg-purple-950 border-2 border-purple-900 text-purple-400 text-xs font-bold py-2.5 px-2 rounded-lg transition text-center";
+                btn.querySelector('span').className = "text-[10px] text-purple-500";
+            });
+            event.currentTarget.className = "format-btn bg-purple-900/60 border-2 border-fuchsia-500 text-white text-xs font-bold py-2.5 px-2 rounded-xl transition text-center shadow-md";
+            event.currentTarget.querySelector('span').className = "text-[10px] text-fuchsia-300";
+
+            document.getElementById('ticket-price-display').textContent = `$${price.toFixed(2)}`;
+            updateTicketSummary();
+        }
+
+        function renderSeats() {
+            const grid = document.getElementById('seats-grid');
+            grid.innerHTML = '';
+
+            rows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = "flex items-center gap-2";
+
+                const labelLeft = document.createElement('span');
+                labelLeft.className = "w-4 text-center text-xs font-black text-purple-400/80";
+                labelLeft.textContent = row;
+                rowDiv.appendChild(labelLeft);
+
+                for (let i = 1; i <= cols; i++) {
+                    const seatId = `${row}${i}`;
+                    const isOccupied = occupiedSeats.includes(seatId);
+                    const isSelected = selectedSeats.includes(seatId);
+
+                    const seatBtn = document.createElement('button');
+                    seatBtn.type = 'button';
+                    seatBtn.className = `seat w-7 h-7 rounded-t-lg text-[10px] font-black flex items-center justify-center transition ${
+                        isOccupied ? 'bg-rose-950 text-rose-400 cursor-not-allowed border border-rose-800' : 
+                        (isSelected ? 'bg-fuchsia-500 text-white shadow-lg scale-105 font-black shadow-fuchsia-500/50' : 'bg-purple-950 text-purple-300 hover:bg-purple-900/80 border border-purple-800')
+                    }`;
+                    seatBtn.textContent = i;
+                    seatBtn.disabled = isOccupied;
+
+                    if (!isOccupied) {
+                        seatBtn.onclick = () => toggleSeat(seatId);
+                    }
+                    rowDiv.appendChild(seatBtn);
+                }
+
+                const labelRight = document.createElement('span');
+                labelRight.className = "w-4 text-center text-xs font-black text-purple-400/80";
+                labelRight.textContent = row;
+                rowDiv.appendChild(labelRight);
+
+                grid.appendChild(rowDiv);
+            });
+        }
+
+        function toggleSeat(seatId) {
+            const index = selectedSeats.indexOf(seatId);
+            if (index > -1) {
+                selectedSeats.splice(index, 1);
+            } else {
+                selectedSeats.push(seatId);
+            }
+            renderSeats();
+            updateTicketSummary();
+        }
+
+        function updateTicketSummary() {
+            document.getElementById('selected-seats-count').textContent = selectedSeats.length;
+            const total = selectedSeats.length * selectedFormatPrice;
+            document.getElementById('ticket-total-display').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function proceedToPayment() {
+            if (selectedSeats.length === 0) {
+                showNotification('Por favor selecciona al menos una butaca.', 'error');
+                return;
+            }
+            const movie = movies.find(m => m.id === selectedMovieId);
+            const total = selectedSeats.length * selectedFormatPrice;
+            
+            showNotification(`¡Compra exitosa! ${selectedSeats.length} boletos para "${movie.title}" (${selectedTime}) en asientos: ${selectedSeats.join(', ')}. Total: $${total.toFixed(2)}`, 'success');
+            
+            occupiedSeats = occupiedSeats.concat(selectedSeats);
+            selectedSeats = [];
+            renderSeats();
+            updateTicketSummary();
+        }
+
+        // 3. Dulcería Logic
+        function renderConcession(items) {
+            const grid = document.getElementById('concession-grid');
+            grid.innerHTML = '';
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-cinepurpleDark/80 border border-purple-800/60 rounded-2xl p-4 flex gap-4 items-center justify-between hover:border-fuchsia-500/80 transition shadow-lg backdrop-blur-sm";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3.5">
+                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-xl border border-purple-800/80" onerror="this.src='https://placehold.co/200x200/2a0845/e9d5ff?text=Dulceria'">
+                        <div>
+                            <span class="text-[9px] font-black uppercase tracking-wider text-fuchsia-300 bg-purple-900/80 px-2 py-0.5 rounded border border-purple-700">${item.category}</span>
+                            <h4 class="text-xs sm:text-sm font-bold text-white mt-1">${item.name}</h4>
+                            <p class="text-[11px] text-purple-300/80 line-clamp-1 mt-0.5">${item.desc}</p>
+                            <p class="text-xs sm:text-sm font-black text-fuchsia-400 mt-1">$${item.price.toFixed(2)} MXN</p>
+                        </div>
+                    </div>
+                    <button onclick="addToConcessionCart(${item.id})" class="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white p-2.5 rounded-xl font-black transition shadow-md flex-shrink-0">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterConcession(cat) {
+            document.querySelectorAll('.concession-filter').forEach(btn => {
+                btn.className = "concession-filter bg-purple-950/70 text-purple-200 hover:bg-purple-900/60 px-3.5 py-1.5 rounded-lg text-xs transition border border-purple-800/80";
+            });
+            event.currentTarget.className = "concession-filter bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-black px-3.5 py-1.5 rounded-lg text-xs transition";
+
+            if (cat === 'todos') {
+                renderConcession(concessionItems);
+            } else {
+                renderConcession(concessionItems.filter(i => i.category === cat));
+            }
+        }
+
+        function addToConcessionCart(itemId) {
+            const item = concessionItems.find(i => i.id === itemId);
+            const cartItem = concessionCart.find(c => c.id === itemId);
+            if (cartItem) {
+                cartItem.quantity += 1;
+            } else {
+                concessionCart.push({ ...item, quantity: 1 });
+            }
+            updateConcessionCartUI();
+            showNotification(`Agregado: ${item.name}`, 'success');
+        }
+
+        function updateConcessionCartUI() {
+            const list = document.getElementById('cart-items-list');
+            const countBadge = document.getElementById('cart-item-count');
+            const totalPriceEl = document.getElementById('cart-total-price');
+
+            list.innerHTML = '';
+            let totalCount = 0;
+            let totalPrice = 0;
+
+            if (concessionCart.length === 0) {
+                list.innerHTML = `<p class="text-purple-400/60 text-center py-8 text-xs">Tu carrito está vacío.</p>`;
+                countBadge.textContent = '0';
+                totalPriceEl.textContent = '$0.00';
+                return;
+            }
+
+            concessionCart.forEach(cartItem => {
+                totalCount += cartItem.quantity;
+                totalPrice += cartItem.price * cartItem.quantity;
+
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between bg-purple-950/80 p-2.5 rounded-xl border border-purple-800/80";
+                row.innerHTML = `
+                    <div class="flex-1 pr-2">
+                        <p class="font-bold text-white leading-tight">${cartItem.name}</p>
+                        <p class="text-fuchsia-400 font-semibold">$${cartItem.price} x ${cartItem.quantity}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="changeQuantity(${cartItem.id}, -1)" class="w-5 h-5 bg-purple-900 hover:bg-purple-800 text-white rounded flex items-center justify-center font-bold text-xs">-</button>
+                        <span class="font-bold text-white text-xs px-1">${cartItem.quantity}</span>
+                        <button onclick="changeQuantity(${cartItem.id}, 1)" class="w-5 h-5 bg-purple-900 hover:bg-purple-800 text-white rounded flex items-center justify-center font-bold text-xs">+</button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+
+            countBadge.textContent = totalCount;
+            totalPriceEl.textContent = `$${totalPrice.toFixed(2)}`;
+        }
+
+        function changeQuantity(itemId, delta) {
+            const itemIndex = concessionCart.findIndex(c => c.id === itemId);
+            if (itemIndex > -1) {
+                concessionCart[itemIndex].quantity += delta;
+                if (concessionCart[itemIndex].quantity <= 0) {
+                    concessionCart.splice(itemIndex, 1);
+                }
+            }
+            updateConcessionCartUI();
+        }
+
+        function checkoutConcession() {
+            if (concessionCart.length === 0) {
+                showNotification('Tu carrito de dulcería está vacío.', 'error');
+                return;
+            }
+            let total = concessionCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            showNotification(`¡Pedido de dulcería registrado! Total pagado: $${total.toFixed(2)} MXN. Recoge tu pedido con tu número de orden.`, 'success');
+            concessionCart = [];
+            updateConcessionCartUI();
+        }
+
+        // 4. Club Cinépolis con Código de 16 Dígitos
+        function generateClubCard() {
+            const nameInput = document.getElementById('club-name-input').value.trim();
+            const emailInput = document.getElementById('club-email-input').value.trim();
+            const levelSelect = document.getElementById('club-level-select').value;
+
+            if (!nameInput || !emailInput) {
+                showNotification('Ingresa tu nombre y correo para solicitar la tarjeta.', 'error');
+                return;
+            }
+
+            // Generador de 16 números aleatorios formateado en bloques de 4
+            let rawNumbers = '';
+            for (let i = 0; i < 16; i++) {
+                rawNumbers += Math.floor(Math.random() * 10);
+            }
+            const formattedCardNumber = rawNumbers.match(/.{1,4}/g).join(' ');
+
+            // Renderizar la tarjeta
+            document.getElementById('card-display-number').textContent = formattedCardNumber;
+            document.getElementById('card-display-name').textContent = nameInput.toUpperCase();
+            document.getElementById('card-display-level').textContent = levelSelect;
+
+            showNotification(`¡Tarjeta generada exitosamente! Número asignado: ${formattedCardNumber}`, 'success');
+        }
+    </script>
+</body>
+</html>

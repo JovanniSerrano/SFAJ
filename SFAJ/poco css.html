@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title> Cinépolis </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #4a148c; /* Morado elegante */
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #6a1b9a;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .buscador {
+            text-align: center;
+            padding: 15px;
+            background-color: #e1bee7;
+        }
+
+        .buscador input {
+            padding: 8px;
+            width: 300px;
+            font-size: 16px;
+        }
+
+        .container {
+            width: 85%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #4a148c;
+            border-bottom: 2px solid #6a1b9a;
+            padding-bottom: 5px;
+        }
+
+        /* Estilos de Cartelera y Dulcería */
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 220px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #7b1fa2;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        button:hover {
+            background-color: #4a148c;
+        }
+
+        /* Butacas / Asientos */
+        .asiento {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            margin: 5px;
+            background-color: #c8e6c9;
+            text-align: center;
+            line-height: 35px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .asiento.seleccionado {
+            background-color: #ab47bc;
+            color: white;
+        }
+
+        .pantalla-cine {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        footer {
+            background-color: #311b92;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <h1> Cinépolis </h1>
+    </header>
+
+    <!-- MENÚ DE NAVEGACIÓN -->
+    <nav>
+        <a href="#cartelera">Cartelera</a>
+        <a href="#entradas">Entradas y Boletos</a>
+        <a href="#dulceria">Dulcería</a>
+        <a href="#club">Club Cinépolis</a>
+    </nav>
+
+    <!-- BARRA DE BÚSQUEDA -->
+    <div class="buscador">
+        <label for="inputBuscar"><b>Buscar Película:</b></label>
+        <input type="text" id="inputBuscar" placeholder="Ej. Thor, Iron Man..." onkeyup="filtrarPeliculas()">
+    </div>
+
+    <!-- SECCIÓN 1: CARTELERA -->
+    <div class="container" id="cartelera">
+        <h2>Cartelera</h2>
+        <div class="grid" id="contenedorCartelera">
+            <!-- Película 1 -->
+            <div class="card pelicula-item" data-nombre="baby driver">
+                <img src="Baby Driver.jpg" alt="Baby Driver">
+                <h3>Baby Driver</h3>
+                <p><b>Duración:</b> 1h 53m</p>
+                <p><b>Clasificación:</b> B15</p>
+            </div>
+            <!-- Película 2 -->
+            <div class="card pelicula-item" data-nombre="avengers doomsday">
+                <img src="Doomsday.jpg" alt="Avengers Doomsday">
+                <h3>Avengers Doomsday</h3>
+                <p><b>Duración:</b> 2h 30m</p>
+                <p><b>Clasificación:</b> B</p>
+            </div>
+            <!-- Película 3 -->
+            <div class="card pelicula-item" data-nombre="como entrenar a tu dragon">
+                <img src="Dragon.jpg" alt="Cómo entrenar a tu dragón">
+                <h3>Cómo entrenar a tu Dragón</h3>
+                <p><b>Duración:</b> 1h 45m</p>
+                <p><b>Clasificación:</b> A</p>
+            </div>
+            <!-- Película 4 -->
+            <div class="card pelicula-item" data-nombre="la noche del demonio">
+                <img src="Insidiousjpg.jpg" alt="La noche del demonio">
+                <h3>La Noche del Demonio</h3>
+                <p><b>Duración:</b> 1h 40m</p>
+                <p><b>Clasificación:</b> C</p>
+            </div>
+            <!-- Película 5 -->
+            <div class="card pelicula-item" data-nombre="iron man">
+                <img src="Iron man.jpg" alt="Iron Man">
+                <h3>Iron Man</h3>
+                <p><b>Duración:</b> 2h 06m</p>
+                <p><b>Clasificación:</b> B</p>
+            </div>
+            <!-- Película 6 -->
+            <div class="card pelicula-item" data-nombre="thor el mundo oscuro">
+                <img src="Thor.jpg" alt="Thor El Mundo Oscuro">
+                <h3>Thor: El Mundo Oscuro</h3>
+                <p><b>Duración:</b> 1h 52m</p>
+                <p><b>Clasificación:</b> B</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 2: ENTRADAS Y BUTACAS -->
+    <div class="container" id="entradas">
+        <h2>Selección de Entradas y Asientos</h2>
+        <p>Selecciona tus butacas haciendo clic sobre ellas:</p>
+        
+        <div class="pantalla-cine">PANTALLA DE CINE</div>
+        <div style="text-align: center;" id="mapaAsientos">
+            <!-- Generación básica de asientos con JavaScript o HTML directo -->
+            <script>
+                for(let i = 1; i <= 15; i++) {
+                    document.write(`<div class="asiento" onclick="toggleAsiento(this)">A${i}</div>`);
+                }
+            </script>
+        </div>
+        <br>
+        <div style="text-align: center;">
+            <button onclick="comprarBoletos()">Comprar Boletos</button>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 3: DULCERÍA -->
+    <div class="container" id="dulceria">
+        <h2>Dulcería</h2>
+        <div class="grid">
+            <div class="card">
+                <img src="CP.jpg" alt="Crepa Pizza">
+                <h3>Crepa Pizza</h3>
+                <p>$85.00</p>
+                <button onclick="agregarDulceria('Crepa Pizza', 85)">Agregar</button>
+            </div>
+            <div class="card">
+                <img src="CFR.jpg" alt="Crepa Fresa">
+                <h3>Crepa de Fresa</h3>
+                <p>$75.00</p>
+                <button onclick="agregarDulceria('Crepa de Fresa', 75)">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 4: CLUB CINÉPOLIS Y GENERADOR DE CÓDIGOS -->
+    <div class="container" id="club">
+        <h2>Club Cinépolis</h2>
+        <p>Regístrate para obtener tu tarjeta de socio generada automáticamente por el sistema:</p>
+        
+        <label>Nombre Completo:</label><br>
+        <input type="text" id="txtNombre" placeholder="Tu nombre"><br><br>
+        
+        <button onclick="generarTarjetaSocio()">Solicitar Tarjeta de Socio</button>
+        
+        <h3>Tu Tarjeta Generada:</h3>
+        <p id="resultadoTarjeta" style="font-size: 18px; font-weight: bold; color: #4a148c;"></p>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2026 Cinépolis - SFAJ - 0898 - 5°J MTRA:MEZA DIAZ </p>
+    </footer>
+
+    <!-- JAVASCRIPT BÁSICO (Lógica vista en clases de programación) -->
+    <script>
+        // 1. Función para filtrar películas en la barra de búsqueda
+        function filtrarPeliculas() {
+            let texto = document.getElementById("inputBuscar").value.toLowerCase();
+            let peliculas = document.getElementsByClassName("pelicula-item");
+
+            for (let i = 0; i < peliculas.length; i++) {
+                let nombre = peliculas[i].getAttribute("data-nombre");
+                if (nombre.includes(texto)) {
+                    peliculas[i].style.display = "block";
+                } else {
+                    peliculas[i].style.display = "none";
+                }
+            }
+        }
+
+        // 2. Función para seleccionar/deseleccionar butacas
+        function toggleAsiento(elemento) {
+            // Alterna la clase CSS 'seleccionado'
+            if (elemento.classList.contains("seleccionado")) {
+                elemento.classList.remove("seleccionado");
+            } else {
+                elemento.classList.add("seleccionado");
+            }
+        }
+
+        function comprarBoletos() {
+            let seleccionados = document.getElementsByClassName("asiento seleccionado");
+            alert("¡Compra exitosa! Has seleccionado " + seleccionados.length + " asiento(s).");
+        }
+
+        // 3. Función de dulcería
+        function agregarDulceria(producto, precio) {
+            alert("Has agregado " + producto + " a tu pedido. Total parcial: $" + precio);
+        }
+
+        // 4. Generador de 16 números aleatorios para la tarjeta Club Cinépolis
+        function generarTarjetaSocio() {
+            let nombre = document.getElementById("txtNombre").value;
+            if(nombre === "") {
+                alert("Por favor ingresa tu nombre primero.");
+                return;
+            }
+
+            let tarjeta = "";
+            // Ciclo for para generar 16 dígitos aleatorios
+            for (let i = 0; i < 16; i++) {
+                let digitoAleatorio = Math.floor(Math.random() * 10);
+                tarjeta += digitoAleatorio;
+                // Opcional: poner un espacio cada 4 dígitos para que se vea estético
+                if ((i + 1) % 4 === 0 && i < 15) {
+                    tarjeta += " ";
+                }
+            }
+
+            document.getElementById("resultadoTarjeta").innerHTML = 
+                "Socio: " + nombre + "<br>Tarjeta No.: " + tarjeta;
+        }
+    </script>
+</body>
+</html>
